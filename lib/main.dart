@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'Chat App/Message Search Screen.dart';
 import 'Chat App/Call History Screen.dart';
+import 'Chat App/Home Screen/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,7 +23,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ⬇️ INI NAVIGASI UTAMA
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -33,10 +33,10 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  // daftar halaman
   final List<Widget> _screens = const [
-    MessageSearchScreen(),
-    CallHistoryScreen(),
+    HomeScreen(),           // index 0 - Chats (Home)
+    MessageSearchScreen(),  // index 1 - Search
+    CallHistoryScreen(),    // index 2 - Calls
   ];
 
   void _onItemTapped(int index) {
@@ -48,17 +48,27 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex], // tampilkan halaman sesuai index
+      body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        selectedItemColor: const Color(0xFF00BF6D),
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
+            icon: Icon(Icons.chat_bubble_outline),
+            activeIcon: Icon(Icons.chat_bubble),
             label: 'Chats',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.call),
+            icon: Icon(Icons.search),
+            activeIcon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.phone_outlined),
+            activeIcon: Icon(Icons.phone),
             label: 'Calls',
           ),
         ],
