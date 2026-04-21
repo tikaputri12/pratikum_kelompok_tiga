@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'Chat App/Message Search Screen.dart';
 import 'Chat App/Call History Screen.dart';
 import 'Chat App/Home Screen/home_screen.dart';
+import 'package:pratikum_kelompok_tiga/chat_app/auth_screen.dart';
+import 'package:pratikum_kelompok_tiga/chat_app/call_history_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,12 +15,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'Chat App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
-      home: const MainScreen(),
+      home: const AuthScreen(),
     );
   }
 }
@@ -34,9 +37,9 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = const [
-    HomeScreen(),           // index 0 - Chats (Home)
-    MessageSearchScreen(),  // index 1 - Search
-    CallHistoryScreen(),    // index 2 - Calls
+    HomeScreen(), // index 0 - Chats (Home)
+    MessageSearchScreen(), // index 1 - Search
+    CallHistoryScreen(), // index 2 - Calls
   ];
 
   void _onItemTapped(int index) {
