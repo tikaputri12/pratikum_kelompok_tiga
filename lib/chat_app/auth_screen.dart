@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -8,7 +10,8 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
+class _AuthScreenState extends State<AuthScreen>
+    with TickerProviderStateMixin {
   late TabController _tabController;
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
@@ -18,258 +21,154 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   bool _obscureConfirmPassword = true;
   bool isLoading = false;
 
+  String apiMessage = ""; // 🔥 hasil dari API
+
   final _loginEmailController = TextEditingController();
   final _loginPasswordController = TextEditingController();
   final _loginFormKey = GlobalKey<FormState>();
 
-  final _registerNameController = TextEditingController();
-  final _registerEmailController = TextEditingController();
-  final _registerPasswordController = TextEditingController();
-  final _registerConfirmPasswordController = TextEditingController();
-  final _registerFormKey = GlobalKey<FormState>();
-
   @override
   void initState() {
     super.initState();
+
     _tabController = TabController(length: 2, vsync: this);
+
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
+
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
+
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 0.12),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
-    _animController.forward();
 
-    _tabController.addListener(() {
-      _animController.reset();
-      _animController.forward();
-    });
+    _animController.forward();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     _animController.dispose();
-    _loginEmailController.dispose();
-    _loginPasswordController.dispose();
-    _registerNameController.dispose();
-    _registerEmailController.dispose();
-    _registerPasswordController.dispose();
-    _registerConfirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _login() {
+  /////////////////////////////////////////////
+  /// 🔥 API CALL
+  /////////////////////////////////////////////
+  Future<void> fetchProfile() async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          "https://api.ppb.widiarrohman.my.id/api/2026/uts/A/kelompok3/profile",
+        ),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          apiMessage = response.body;
+        });
+      } else {
+        setState(() {
+          apiMessage = "Gagal ambil data (${response.statusCode})";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        apiMessage = "Error: $e";
+      });
+    }
+  }
+
+  /////////////////////////////////////////////
+  /// 🔥 LOGIN
+  /////////////////////////////////////////////
+  void _login() async {
     if (_loginFormKey.currentState!.validate()) {
       setState(() => isLoading = true);
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Login berhasil'),
-            backgroundColor: const Color(0xFF6C63FF),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-      });
+
+      await fetchProfile(); // 🔥 ambil API saat login
+
+      setState(() => isLoading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login + API berhasil')),
+      );
     }
   }
 
-  void _register() {
-    if (_registerFormKey.currentState!.validate()) {
-      if (_registerPasswordController.text !=
-          _registerConfirmPasswordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Password tidak sama'),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-        return;
-      }
-      setState(() => isLoading = true);
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Register berhasil'),
-            backgroundColor: const Color(0xFF6C63FF),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-      });
-    }
-  }
-
+  /////////////////////////////////////////////
+  /// UI
+  /////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0F0E17),
       body: Stack(
         children: [
-          // Background blobs
-          Positioned(
-            top: -80,
-            left: -60,
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFF6C63FF).withOpacity(0.35),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -100,
-            right: -60,
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFFFF6584).withOpacity(0.25),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
+          _bgCircle(-80, -60, 280, const Color(0xFF6C63FF)),
+          _bgCircle(null, -60, 320, const Color(0xFFFF6584),
+              bottom: -100),
 
           SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: 48),
+                const SizedBox(height: 40),
 
-                // Logo & Title
+                /// 🔥 LOGO + TITLE + API TEXT
                 FadeTransition(
                   opacity: _fadeAnim,
                   child: Column(
                     children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF6C63FF), Color(0xFFFF6584)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF6C63FF).withOpacity(0.5),
-                              blurRadius: 24,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.chat_bubble_rounded,
-                          color: Colors.white,
-                          size: 32,
-                        ),
-                      ),
+                      _logo(),
                       const SizedBox(height: 16),
                       const Text(
                         'ChatApp',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.2,
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
+
+                      const SizedBox(height: 6),
+
+                      /// 🔥 HASIL API MUNCUL DI SINI
                       Text(
-                        'Connect with the world',
+                        apiMessage.isEmpty
+                            ? "Belum ambil data API"
+                            : apiMessage,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.45),
+                          color: Colors.greenAccent,
                           fontSize: 13,
-                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
 
-                // Tab Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.07),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.1),
-                          ),
-                        ),
-                        child: TabBar(
-                          controller: _tabController,
-                          indicator: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF6C63FF), Color(0xFF9B59B6)],
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF6C63FF).withOpacity(0.4),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          labelColor: Colors.white,
-                          unselectedLabelColor: Colors.white.withOpacity(0.4),
-                          labelStyle: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                          ),
-                          dividerColor: Colors.transparent,
-                          tabs: const [
-                            Tab(text: 'Login'),
-                            Tab(text: 'Register'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                _tabBar(),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
-                // Form
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
-                    children: [_buildLoginForm(), _buildRegisterForm()],
+                    children: [
+                      _loginForm(),
+                      const Center(
+                        child: Text(
+                          "Register belum dihubungkan API",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -280,189 +179,101 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildGlassField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool obscure = false,
-    VoidCallback? onToggleObscure,
-    String? Function(String?)? validator,
-    TextInputType? keyboardType,
-  }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: TextFormField(
-          controller: controller,
-          obscureText: obscure,
-          keyboardType: keyboardType,
-          style: const TextStyle(color: Colors.white, fontSize: 15),
-          validator: validator,
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: TextStyle(
-              color: Colors.white.withOpacity(0.5),
-              fontSize: 14,
-            ),
-            prefixIcon: Icon(icon, color: const Color(0xFF6C63FF), size: 20),
-            suffixIcon: onToggleObscure != null
-                ? IconButton(
-                    icon: Icon(
-                      obscure
-                          ? Icons.visibility_rounded
-                          : Icons.visibility_off_rounded,
-                      color: Colors.white.withOpacity(0.4),
-                      size: 20,
-                    ),
-                    onPressed: onToggleObscure,
-                  )
-                : null,
-            filled: true,
-            fillColor: Colors.white.withOpacity(0.07),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(
-                color: Color(0xFF6C63FF),
-                width: 1.5,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFFFF6584)),
-            ),
-            errorStyle: const TextStyle(color: Color(0xFFFF6584)),
+  /////////////////////////////////////////////
+  /// 🔥 COMPONENT UI
+  /////////////////////////////////////////////
+
+  Widget _bgCircle(double? top, double right, double size, Color color,
+      {double? bottom}) {
+    return Positioned(
+      top: top,
+      bottom: bottom,
+      right: right,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [color.withOpacity(0.3), Colors.transparent],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildButton(String label, VoidCallback onPressed) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: DecoratedBox(
+  Widget _logo() {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6C63FF), Color(0xFFFF6584)],
+        ),
+      ),
+      child: const Icon(Icons.chat, color: Colors.white),
+    );
+  }
+
+  Widget _tabBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6C63FF), Color(0xFFFF6584)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
+          color: Colors.white10,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: TabBar(
+          controller: _tabController,
+          indicator: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: const Color(0xFF6C63FF),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6C63FF).withOpacity(0.45),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white38,
+          tabs: const [
+            Tab(text: "Login"),
+            Tab(text: "Register"),
           ],
         ),
-        child: ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
-            ),
-          ),
-        ),
       ),
     );
   }
 
-  Widget _buildLoginForm() {
+  /////////////////////////////////////////////
+  /// 🔥 LOGIN FORM
+  /////////////////////////////////////////////
+  Widget _loginForm() {
     return SlideTransition(
       position: _slideAnim,
       child: FadeTransition(
         opacity: _fadeAnim,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Padding(
+          padding: const EdgeInsets.all(30),
           child: Form(
             key: _loginFormKey,
             child: Column(
               children: [
-                _buildGlassField(
-                  controller: _loginEmailController,
-                  label: 'Email',
-                  icon: Icons.email_rounded,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) =>
-                      v!.isEmpty ? 'Email tidak boleh kosong' : null,
-                ),
+                _field(_loginEmailController, "Email", Icons.email),
                 const SizedBox(height: 16),
-                _buildGlassField(
-                  controller: _loginPasswordController,
-                  label: 'Password',
-                  icon: Icons.lock_rounded,
+                _field(
+                  _loginPasswordController,
+                  "Password",
+                  Icons.lock,
                   obscure: _obscurePassword,
-                  onToggleObscure: () =>
-                      setState(() => _obscurePassword = !_obscurePassword),
-                  validator: (v) =>
-                      v!.isEmpty ? 'Password tidak boleh kosong' : null,
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    'Lupa password?',
-                    style: TextStyle(
-                      color: const Color(0xFF6C63FF).withOpacity(0.85),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  toggle: () => setState(
+                    () => _obscurePassword = !_obscurePassword,
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 30),
+
                 isLoading
-                    ? const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Color(0xFF6C63FF)),
-                      )
-                    : _buildButton('Masuk', _login),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Divider(color: Colors.white.withOpacity(0.1)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        'atau',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.3),
-                          fontSize: 12,
-                        ),
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: _login,
+                        child: const Text("Login + Ambil API"),
                       ),
-                    ),
-                    Expanded(
-                      child: Divider(color: Colors.white.withOpacity(0.1)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _buildSocialButton(
-                  Icons.g_mobiledata_rounded,
-                  'Lanjutkan dengan Google',
-                ),
               ],
             ),
           ),
@@ -471,108 +282,34 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildRegisterForm() {
-    return SlideTransition(
-      position: _slideAnim,
-      child: FadeTransition(
-        opacity: _fadeAnim,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Form(
-            key: _registerFormKey,
-            child: Column(
-              children: [
-                _buildGlassField(
-                  controller: _registerNameController,
-                  label: 'Nama Lengkap',
-                  icon: Icons.person_rounded,
-                  validator: (v) =>
-                      v!.isEmpty ? 'Nama tidak boleh kosong' : null,
+  Widget _field(
+    TextEditingController c,
+    String label,
+    IconData icon, {
+    bool obscure = false,
+    VoidCallback? toggle,
+  }) {
+    return TextFormField(
+      controller: c,
+      obscureText: obscure,
+      style: const TextStyle(color: Colors.white),
+      validator: (v) => v!.isEmpty ? "Wajib diisi" : null,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white54),
+        prefixIcon: Icon(icon, color: Colors.white),
+        suffixIcon: toggle != null
+            ? IconButton(
+                icon: Icon(
+                  obscure ? Icons.visibility : Icons.visibility_off,
                 ),
-                const SizedBox(height: 16),
-                _buildGlassField(
-                  controller: _registerEmailController,
-                  label: 'Email',
-                  icon: Icons.email_rounded,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) =>
-                      v!.isEmpty ? 'Email tidak boleh kosong' : null,
-                ),
-                const SizedBox(height: 16),
-                _buildGlassField(
-                  controller: _registerPasswordController,
-                  label: 'Password',
-                  icon: Icons.lock_rounded,
-                  obscure: _obscurePassword,
-                  onToggleObscure: () =>
-                      setState(() => _obscurePassword = !_obscurePassword),
-                  validator: (v) => v!.length < 6 ? 'Minimal 6 karakter' : null,
-                ),
-                const SizedBox(height: 16),
-                _buildGlassField(
-                  controller: _registerConfirmPasswordController,
-                  label: 'Konfirmasi Password',
-                  icon: Icons.lock_outline_rounded,
-                  obscure: _obscureConfirmPassword,
-                  onToggleObscure: () => setState(
-                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
-                  ),
-                  validator: (v) => v!.isEmpty
-                      ? 'Konfirmasi password tidak boleh kosong'
-                      : null,
-                ),
-                const SizedBox(height: 28),
-                isLoading
-                    ? const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Color(0xFF6C63FF)),
-                      )
-                    : _buildButton('Daftar Sekarang', _register),
-                const SizedBox(height: 16),
-                Text(
-                  'Dengan mendaftar, kamu menyetujui\nSyarat & Ketentuan kami',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.3),
-                    fontSize: 12,
-                    height: 1.6,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton(IconData icon, String label) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: Container(
-          width: double.infinity,
-          height: 52,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.07),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.12)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: Colors.white, size: 24),
-              const SizedBox(width: 10),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+                onPressed: toggle,
+              )
+            : null,
+        filled: true,
+        fillColor: Colors.white10,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );
