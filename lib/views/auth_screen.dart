@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:http/http.dart' as http;
 import 'package:pratikum_kelompok_tiga/viewmodels/auth_viewmodel.dart';
-import 'home_page.dart'; 
+import 'home_page.dart';
 import 'dart:convert';
 
 class AuthScreen extends StatefulWidget {
@@ -66,31 +66,48 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
- void _login() async {
-  print("LOGIN DIKLIK");
+  void _login() async {
+    print("LOGIN DIKLIK");
 
-  if (_loginFormKey.currentState!.validate()) {
-    setState(() => isLoading = true);
+    if (_loginFormKey.currentState!.validate()) {
+      setState(() => isLoading = true);
 
-    final vm = AuthViewModel();
-    await vm.getApiData();
+      final vm = AuthViewModel();
+      await vm.getApiData();
 
-    setState(() => isLoading = false);
+      // 🔥 TAMBAHKAN INI
+      try {
+        final response = await http.get(
+          Uri.parse(
+            "https://api.ppb.widiarrohman.my.id/api/2026/uts/A/kelompok3/chat",
+          ),
+        );
 
-    if (vm.error.isEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => HomePage(apiText: vm.message),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(vm.error)),
-      );
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => HomePage(apiText: data.toString()),
+            ),
+          );
+          return; // ⬅️ penting biar tidak lanjut ke bawah
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("API gagal (${response.statusCode})")),
+          );
+          return;
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error API: $e")));
+        return;
+      }
     }
   }
-}
+
   void _register() {
     if (_registerFormKey.currentState!.validate()) {
       if (_registerPasswordController.text !=

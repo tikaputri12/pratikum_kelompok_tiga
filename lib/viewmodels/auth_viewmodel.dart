@@ -23,7 +23,9 @@ class AuthViewModel extends ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse('https://api.ppb.widiarrohman.my.id/api/2026/uts/A/kelompok3/chats'),
+        Uri.parse(
+          'https://api.ppb.widiarrohman.my.id/api/2026/uts/A/kelompok3/chats',
+        ),
       );
 
       // Print untuk debug di console VS Code
@@ -32,6 +34,40 @@ class AuthViewModel extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final decodedData = json.decode(response.body);
+        if (response.statusCode == 200) {
+          final decodedData = json.decode(response.body);
+
+          if (decodedData is Map<String, dynamic>) {
+            // Jika API membungkus data dalam key 'data'
+            if (decodedData.containsKey('data') &&
+                decodedData['data'] is List) {
+              _chats = decodedData['data'];
+
+              // 🔥 TAMBAHAN DARI KODE KAMU (DISISIPKAN DI SINI)
+              final chats = decodedData['data'] as List;
+
+              _message = chats.map((e) => e['message']).join('\n');
+            } else {
+              _chats = [];
+
+              // 🔥 fallback jika tidak ada data
+              _message = "Tidak ada data";
+            }
+
+            // Ambil message dari API jika ada (optional override)
+            if (decodedData.containsKey('message') &&
+                decodedData['message'] != null) {
+              // kamu bisa pilih mau pakai ini atau tidak
+              // kalau mau prioritas chat, KOMEN baris ini
+              // _message = decodedData['message'].toString();
+            }
+          } else if (decodedData is List) {
+            _chats = decodedData;
+
+            // 🔥 handle kalau langsung list
+            _message = _chats.map((e) => e['message']).join('\n');
+          }
+        }
 
         // --- LOGIKA PENGECEKAN STRUKTUR (DISELIPKAN DI SINI) ---
         if (decodedData is Map<String, dynamic>) {
@@ -42,9 +78,10 @@ class AuthViewModel extends ChangeNotifier {
             // Jika format Map tapi tidak ada list 'data', set ke list kosong agar tidak error
             _chats = [];
           }
-          
+
           // Ambil message dari API jika ada
-          if (decodedData.containsKey('message') && decodedData['message'] != null) {
+          if (decodedData.containsKey('message') &&
+              decodedData['message'] != null) {
             _message = decodedData['message'].toString();
           }
         } else if (decodedData is List) {
@@ -52,7 +89,6 @@ class AuthViewModel extends ChangeNotifier {
           _chats = decodedData;
         }
         // -------------------------------------------------------
-
       } else {
         _error = "Server Error: ${response.statusCode}";
       }
