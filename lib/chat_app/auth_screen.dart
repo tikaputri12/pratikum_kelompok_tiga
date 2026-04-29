@@ -40,7 +40,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
 
     _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.11),
+      begin: const Offset(0, 0.12),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
 
