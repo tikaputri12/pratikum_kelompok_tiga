@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/auth_viewmodel.dart';
+import '../chat_app/chat_detail_screen.dart';
 
 class HomePage extends StatefulWidget {
   // apiText tetap diterima di constructor agar Navigator.push tidak error
@@ -33,14 +34,18 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "UTS Kelas A - Kelompok 3", 
+              "UTS Kelas A - Kelompok 3",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Consumer<AuthViewModel>(
               builder: (context, authVM, child) {
                 return Text(
-                  authVM.message.isEmpty ? widget.apiText : authVM.message, 
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: Colors.white70),
+                  authVM.message.isEmpty ? widget.apiText : authVM.message,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.white70,
+                  ),
                 );
               },
             ),
@@ -88,7 +93,9 @@ class _HomePageState extends State<HomePage> {
                   builder: (context, authVM, child) {
                     if (authVM.isLoading) {
                       return const Center(
-                        child: CircularProgressIndicator(color: Color(0xFF00BFA5)),
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF00BFA5),
+                        ),
                       );
                     }
 
@@ -97,12 +104,15 @@ class _HomePageState extends State<HomePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(authVM.error, style: const TextStyle(color: Colors.red)),
+                            Text(
+                              authVM.error,
+                              style: const TextStyle(color: Colors.red),
+                            ),
                             const SizedBox(height: 10),
                             ElevatedButton(
                               onPressed: () => authVM.getApiData(),
                               child: const Text("Coba Lagi"),
-                            )
+                            ),
                           ],
                         ),
                       );
@@ -116,7 +126,8 @@ class _HomePageState extends State<HomePage> {
                     return ListView.separated(
                       padding: const EdgeInsets.only(top: 20, bottom: 20),
                       itemCount: chats.length,
-                      separatorBuilder: (context, index) => const Divider(indent: 80, height: 1),
+                      separatorBuilder: (context, index) =>
+                          const Divider(indent: 80, height: 1),
                       itemBuilder: (context, index) {
                         final chat = chats[index];
                         if (chat == null) return const SizedBox.shrink();
@@ -127,23 +138,43 @@ class _HomePageState extends State<HomePage> {
                             radius: 28,
                             backgroundColor: Colors.grey[200],
                             child: Text(
-                              chat['profile'] != null ? chat['profile'].toString()[0].toUpperCase() : '?', 
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              chat['profile'] != null
+                                  ? chat['profile'].toString()[0].toUpperCase()
+                                  : '?',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           title: Text(
-                            chat['profile']?.toString() ?? 'No Name', 
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            chat['profile']?.toString() ?? 'No Name',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           subtitle: Text(
-                            chat['message']?.toString() ?? '', 
+                            chat['message']?.toString() ?? '',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           trailing: Text(
-                            chat['time']?.toString() ?? '', 
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            chat['time']?.toString() ?? '',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
                           ),
+
+                          // 🔥 INI YANG KURANG
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChatDetailScreen(chats: chats),
+                              ),
+                            );
+                          },
                         );
                       },
                     );
