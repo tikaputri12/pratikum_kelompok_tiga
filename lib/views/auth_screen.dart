@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:http/http.dart' as http;
+import 'package:pratikum_kelompok_tiga/viewmodels/auth_viewmodel.dart';
+import 'home_page.dart'; 
+import 'dart:convert';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -62,25 +66,31 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _login() {
-    if (_loginFormKey.currentState!.validate()) {
-      setState(() => isLoading = true);
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Login berhasil'),
-            backgroundColor: const Color(0xFF6C63FF),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-      });
+ void _login() async {
+  print("LOGIN DIKLIK");
+
+  if (_loginFormKey.currentState!.validate()) {
+    setState(() => isLoading = true);
+
+    final vm = AuthViewModel();
+    await vm.getApiData();
+
+    setState(() => isLoading = false);
+
+    if (vm.error.isEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HomePage(apiText: vm.message),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(vm.error)),
+      );
     }
   }
-
+}
   void _register() {
     if (_registerFormKey.currentState!.validate()) {
       if (_registerPasswordController.text !=

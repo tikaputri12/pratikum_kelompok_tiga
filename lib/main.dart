@@ -5,7 +5,15 @@ import 'package:pratikum_kelompok_tiga/chat_app/message_search_screen.dart';
 import 'package:pratikum_kelompok_tiga/chat_app/profile_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        // Mendaftarkan AuthViewModel agar bisa dipakai di seluruh aplikasi
+        ChangeNotifierProvider(create: (_) => AuthViewModel()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -14,10 +22,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Chat App',
       debugShowCheckedModeBanner: false,
+      title: 'UTS Kelompok 3',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        primarySwatch: Colors.teal,
         useMaterial3: true,
       ),
       home: const MainScreen(),
