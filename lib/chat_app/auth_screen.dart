@@ -10,8 +10,7 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen>
-    with TickerProviderStateMixin {
+class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   late TabController _tabController;
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
@@ -41,7 +40,7 @@ class _AuthScreenState extends State<AuthScreen>
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
 
     _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.12),
+      begin: const Offset(0, 0.11),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
 
@@ -94,9 +93,9 @@ class _AuthScreenState extends State<AuthScreen>
 
       setState(() => isLoading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login + API berhasil')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Login + API berhasil')));
     }
   }
 
@@ -110,8 +109,7 @@ class _AuthScreenState extends State<AuthScreen>
       body: Stack(
         children: [
           _bgCircle(-80, -60, 280, const Color(0xFF6C63FF)),
-          _bgCircle(null, -60, 320, const Color(0xFFFF6584),
-              bottom: -100),
+          _bgCircle(null, -60, 320, const Color(0xFFFF6584), bottom: -100),
 
           SafeArea(
             child: Column(
@@ -183,8 +181,13 @@ class _AuthScreenState extends State<AuthScreen>
   /// 🔥 COMPONENT UI
   /////////////////////////////////////////////
 
-  Widget _bgCircle(double? top, double right, double size, Color color,
-      {double? bottom}) {
+  Widget _bgCircle(
+    double? top,
+    double right,
+    double size,
+    Color color, {
+    double? bottom,
+  }) {
     return Positioned(
       top: top,
       bottom: bottom,
@@ -262,9 +265,8 @@ class _AuthScreenState extends State<AuthScreen>
                   "Password",
                   Icons.lock,
                   obscure: _obscurePassword,
-                  toggle: () => setState(
-                    () => _obscurePassword = !_obscurePassword,
-                  ),
+                  toggle: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
                 ),
                 const SizedBox(height: 30),
 
@@ -300,17 +302,13 @@ class _AuthScreenState extends State<AuthScreen>
         prefixIcon: Icon(icon, color: Colors.white),
         suffixIcon: toggle != null
             ? IconButton(
-                icon: Icon(
-                  obscure ? Icons.visibility : Icons.visibility_off,
-                ),
+                icon: Icon(obscure ? Icons.visibility : Icons.visibility_off),
                 onPressed: toggle,
               )
             : null,
         filled: true,
         fillColor: Colors.white10,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
