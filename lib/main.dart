@@ -30,7 +30,39 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // Jika ingin langsung ke daftar chat setelah login:
-      home: const AuthScreen(), 
+      home: const _StartPage(), 
+    );
+  }
+  
+}
+class _StartPage extends StatefulWidget {
+  const _StartPage({super.key});
+
+  @override
+  State<_StartPage> createState() => _StartPageState();
+}
+
+class _StartPageState extends State<_StartPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    // ⏱ delay biar tidak crash saat build
+    Future.delayed(const Duration(milliseconds: 500), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomePage(apiText: '',)),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Bisa tampil kosong / loading sebentar
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }

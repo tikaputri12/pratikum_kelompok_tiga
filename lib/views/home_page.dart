@@ -4,7 +4,6 @@ import '../viewmodels/auth_viewmodel.dart';
 import '../chat_app/chat_detail_screen.dart';
 
 class HomePage extends StatefulWidget {
-  // apiText tetap diterima di constructor agar Navigator.push tidak error
   final String apiText;
   const HomePage({super.key, required this.apiText});
 
@@ -16,7 +15,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Memanggil API secara otomatis saat halaman dibuka
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthViewModel>().getApiData();
     });
