@@ -43,12 +43,18 @@ dev_dependencies:
     sdk: flutter
   flutter_native_splash: ^2.4.0
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter_native_splash:
   color: "#ffffff" 
-  image: assets/icon(2).png 
+  image: assets/icon2.png 
   android: true
   ios: true
+
+  android_12:
+    image: assets/icon2.png
+    icon_background_color: "#ffffff"
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -61,8 +67,17 @@ flutter_native_splash:
 
 # The following section is specific to Flutter packages.
 flutter:
+  uses-material-design: true
   assets:
-    - assets/icon(2).png
+    - assets/icon2.png
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon2.png"
+
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/icon2.png"
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
