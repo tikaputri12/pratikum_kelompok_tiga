@@ -12,6 +12,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  int _currentIndex = 1; 
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +33,23 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
+
+              Row(
+                children: const [
+                  Icon(Icons.chat, color: Colors.blue, size: 28),
+                  SizedBox(width: 8),
+                  Text(
+                    "AppChat",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 10),
 
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,6 +211,30 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
+      ),
+
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        selectedItemColor: Colors.blue,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: "Profile",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
+            label: "Chat",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.call),
+            label: "Panggilan",
+          ),
+        ],
       ),
 
       floatingActionButton: FloatingActionButton(
