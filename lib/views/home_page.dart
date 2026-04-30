@@ -12,8 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
-  int _currentIndex = 1; 
+  int _currentIndex = 1;
 
   @override
   void initState() {
@@ -34,59 +33,77 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             children: [
 
-              Row(
-                children: const [
-                  Icon(Icons.chat, color: Colors.blue, size: 28),
-                  SizedBox(width: 8),
-                  Text(
-                    "AppChat",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
+              /// 🔥 HEADER
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: const [
+                      Icon(Icons.chat, color: Colors.blue, size: 28),
+                      SizedBox(width: 8),
+                      Text(
+                        "AppChat",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  const Text(
+                    "UTS Kelas A - Kelompok 3",
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                 ],
               ),
 
               const SizedBox(height: 10),
 
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              /// 🔥 STORIES
+              SizedBox(
+                height: 90,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    _storyItem("Anda", true),
+                    _storyItem("Ainun", false),
+                    _storyItem("Ryan", false),
+                    _storyItem("Adinda", false),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// 🔥 PEOPLE
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    "UTS Kelas A - Kelompok 3",
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                    "People",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(height: 5),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "People",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        child: const Text("+ Add"),
-                      ),
-                    ],
+                    ),
+                    child: const Text("+ Add"),
                   ),
                 ],
               ),
 
               const SizedBox(height: 15),
 
+              /// 🔥 TAB
               Container(
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
@@ -102,6 +119,7 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 15),
 
+              /// 🔥 SEARCH
               TextField(
                 decoration: InputDecoration(
                   hintText: "Search",
@@ -115,8 +133,9 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              const SizedBox(height: 15),
+              const SizedBox(height: 10),
 
+              /// 🔥 LIST CHAT
               Expanded(
                 child: Consumer<AuthViewModel>(
                   builder: (context, authVM, child) {
@@ -208,11 +227,24 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
               ),
+
+              /// 🔥 FILTER DI BAWAH (SEBELUM NAV)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _filterChip("Semua", true),
+                    _filterChip("Belum dibaca", false),
+                    _filterChip("Favorit", false),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       ),
 
+      /// 🔥 BOTTOM NAV
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         selectedItemColor: Colors.blue,
@@ -258,6 +290,57 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: active ? Colors.black : Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _storyItem(String name, bool isMe) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: Colors.grey.shade300,
+                child: Text(name[0]),
+              ),
+              if (isMe)
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: CircleAvatar(
+                    radius: 10,
+                    backgroundColor: Colors.blue,
+                    child: const Icon(Icons.add, size: 14, color: Colors.white),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Text(name, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  Widget _filterChip(String text, bool active) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: active ? Colors.blue : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: active ? Colors.white : Colors.black,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
