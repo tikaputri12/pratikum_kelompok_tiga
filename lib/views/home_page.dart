@@ -32,7 +32,6 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-
               /// 🔥 HEADER
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,10 +82,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   const Text(
                     "People",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   ElevatedButton(
                     onPressed: () {},
@@ -140,9 +136,7 @@ class _HomePageState extends State<HomePage> {
                 child: Consumer<AuthViewModel>(
                   builder: (context, authVM, child) {
                     if (authVM.isLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
+                      return const Center(child: CircularProgressIndicator());
                     }
 
                     if (authVM.error.isNotEmpty) {
@@ -173,39 +167,50 @@ class _HomePageState extends State<HomePage> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(14),
                             boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 5,
-                              ),
+                              BoxShadow(color: Colors.black12, blurRadius: 5),
                             ],
                           ),
                           child: ListTile(
                             contentPadding: EdgeInsets.zero,
+
                             leading: CircleAvatar(
                               backgroundColor: Colors.blue.shade100,
                               child: Text(
                                 chat['profile'] != null
                                     ? chat['profile']
-                                        .toString()[0]
-                                        .toUpperCase()
+                                          .toString()[0]
+                                          .toUpperCase()
                                     : '?',
                               ),
                             ),
+
                             title: Text(
                               chat['profile']?.toString() ?? '',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+
                             subtitle: Text(
                               chat['message']?.toString() ?? '',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            trailing: Text(
-                              chat['time']?.toString() ?? '',
-                              style: const TextStyle(fontSize: 12),
+
+                            /// 🔥 STATUS + JAM
+                            trailing: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  chat['time']?.toString() ?? '',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                const SizedBox(height: 4),
+                                _messageStatus(chat['status'] ?? ''),
+                              ],
                             ),
+
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -223,7 +228,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              /// 🔥 FILTER DI BAWAH
+              /// 🔥 FILTER
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -239,7 +244,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      /// 🔥 BOTTOM NAV + SETTING
+      /// 🔥 BOTTOM NAV
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
@@ -250,22 +255,10 @@ class _HomePageState extends State<HomePage> {
           });
         },
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profile",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: "Chat",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.call),
-            label: "Panggilan",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Setting",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
+          BottomNavigationBarItem(icon: Icon(Icons.call), label: "Panggilan"),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Setting"),
         ],
       ),
 
@@ -275,6 +268,23 @@ class _HomePageState extends State<HomePage> {
         child: const Icon(Icons.message),
       ),
     );
+  }
+
+  /// 🔥 STATUS CHAT
+  Widget _messageStatus(String status) {
+    switch (status) {
+      case "sent":
+        return const Icon(Icons.check, size: 16, color: Colors.grey);
+
+      case "delivered":
+        return const Icon(Icons.done_all, size: 16, color: Colors.grey);
+
+      case "read":
+        return const Icon(Icons.done_all, size: 16, color: Colors.blue);
+
+      default:
+        return const SizedBox();
+    }
   }
 
   Widget _tab(String text, bool active) {
