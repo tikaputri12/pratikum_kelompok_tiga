@@ -181,7 +181,6 @@ class _HomePageState extends State<HomePage> {
                           ),
                           child: ListTile(
                             contentPadding: EdgeInsets.zero,
-
                             leading: CircleAvatar(
                               backgroundColor: Colors.blue.shade100,
                               child: Text(
@@ -192,25 +191,21 @@ class _HomePageState extends State<HomePage> {
                                     : '?',
                               ),
                             ),
-
                             title: Text(
                               chat['profile']?.toString() ?? '',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             subtitle: Text(
                               chat['message']?.toString() ?? '',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-
                             trailing: Text(
                               chat['time']?.toString() ?? '',
                               style: const TextStyle(fontSize: 12),
                             ),
-
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -228,7 +223,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              /// 🔥 FILTER DI BAWAH (SEBELUM NAV)
+              /// 🔥 FILTER DI BAWAH
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -244,9 +239,10 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      /// 🔥 BOTTOM NAV
+      /// 🔥 BOTTOM NAV + SETTING
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
+        type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.blue,
         onTap: (index) {
           setState(() {
@@ -265,6 +261,10 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.call),
             label: "Panggilan",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "Setting",
           ),
         ],
       ),
