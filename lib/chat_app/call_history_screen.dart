@@ -88,7 +88,6 @@ class CallHistoryScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF0F0E17),
       body: Stack(
         children: [
-          // Background blobs
           Positioned(
             top: -80,
             right: -60,
@@ -128,7 +127,6 @@ class CallHistoryScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
                   child: Row(
@@ -184,7 +182,6 @@ class CallHistoryScreen extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                // Filter chips
                 Padding(
                   padding: const EdgeInsets.only(left: 24),
                   child: SingleChildScrollView(
@@ -202,7 +199,6 @@ class CallHistoryScreen extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                // Call List
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -219,7 +215,6 @@ class CallHistoryScreen extends StatelessWidget {
         ],
       ),
 
-      // FAB
       floatingActionButton: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
@@ -302,7 +297,6 @@ class CallHistoryScreen extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Avatar
               Container(
                 width: 50,
                 height: 50,
@@ -328,7 +322,6 @@ class CallHistoryScreen extends StatelessWidget {
 
               const SizedBox(width: 14),
 
-              // Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -372,7 +365,6 @@ class CallHistoryScreen extends StatelessWidget {
                 ),
               ),
 
-              // Call button
               Container(
                 width: 40,
                 height: 40,

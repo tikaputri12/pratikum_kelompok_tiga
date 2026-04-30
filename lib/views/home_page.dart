@@ -31,7 +31,6 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             children: [
 
-              /// 🔥 HEADER + JUDUL
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -68,7 +67,6 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 15),
 
-              /// 🔥 TAB CONTACT / GROUP
               Container(
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
@@ -84,7 +82,6 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 15),
 
-              /// 🔥 SEARCH
               TextField(
                 decoration: InputDecoration(
                   hintText: "Search",
@@ -100,7 +97,6 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 15),
 
-              /// 🔥 LIST CHAT
               Expanded(
                 child: Consumer<AuthViewModel>(
                   builder: (context, authVM, child) {
@@ -205,7 +201,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// 🔥 TAB COMPONENT
   Widget _tab(String text, bool active) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),

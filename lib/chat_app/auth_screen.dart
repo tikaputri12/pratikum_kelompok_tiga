@@ -20,7 +20,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   bool _obscureConfirmPassword = true;
   bool isLoading = false;
 
-  String apiMessage = ""; // 🔥 hasil dari API
+  String apiMessage = "";
 
   final _loginEmailController = TextEditingController();
   final _loginPasswordController = TextEditingController();
@@ -54,9 +54,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  /////////////////////////////////////////////
-  /// 🔥 API CALL
-  /////////////////////////////////////////////
   Future<void> fetchProfile() async {
     try {
       final response = await http.get(
@@ -82,14 +79,11 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     }
   }
 
-  /////////////////////////////////////////////
-  /// 🔥 LOGIN
-  /////////////////////////////////////////////
   void _login() async {
     if (_loginFormKey.currentState!.validate()) {
       setState(() => isLoading = true);
 
-      await fetchProfile(); // 🔥 ambil API saat login
+      await fetchProfile(); 
 
       setState(() => isLoading = false);
 
@@ -99,9 +93,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     }
   }
 
-  /////////////////////////////////////////////
-  /// UI
-  /////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,7 +107,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               children: [
                 const SizedBox(height: 40),
 
-                /// 🔥 LOGO + TITLE + API TEXT
                 FadeTransition(
                   opacity: _fadeAnim,
                   child: Column(
@@ -134,7 +124,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
                       const SizedBox(height: 6),
 
-                      /// 🔥 HASIL API MUNCUL DI SINI
                       Text(
                         apiMessage.isEmpty
                             ? "Belum ambil data API"
@@ -176,10 +165,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       ),
     );
   }
-
-  /////////////////////////////////////////////
-  /// 🔥 COMPONENT UI
-  /////////////////////////////////////////////
 
   Widget _bgCircle(
     double? top,
@@ -244,9 +229,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     );
   }
 
-  /////////////////////////////////////////////
-  /// 🔥 LOGIN FORM
-  /////////////////////////////////////////////
   Widget _loginForm() {
     return SlideTransition(
       position: _slideAnim,

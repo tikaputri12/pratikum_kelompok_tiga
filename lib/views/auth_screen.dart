@@ -75,7 +75,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       final vm = AuthViewModel();
       await vm.getApiData();
 
-      // 🔥 TAMBAHKAN INI
       try {
         final response = await http.get(
           Uri.parse(
@@ -92,7 +91,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               builder: (_) => HomePage(apiText: data.toString()),
             ),
           );
-          return; // ⬅️ penting biar tidak lanjut ke bawah
+          return; 
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("API gagal (${response.statusCode})")),
@@ -147,7 +146,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       backgroundColor: const Color(0xFF0F0E17),
       body: Stack(
         children: [
-          // Background blobs
           Positioned(
             top: -80,
             left: -60,
@@ -188,7 +186,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               children: [
                 const SizedBox(height: 48),
 
-                // Logo & Title
                 FadeTransition(
                   opacity: _fadeAnim,
                   child: Column(
@@ -242,7 +239,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
                 const SizedBox(height: 40),
 
-                // Tab Bar
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: ClipRRect(
@@ -292,7 +288,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
 
                 const SizedBox(height: 24),
 
-                // Form
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,

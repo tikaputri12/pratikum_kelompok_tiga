@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; 
 import 'viewmodels/auth_viewmodel.dart';
-// Import HomePage jika ingin langsung ke sana, atau AuthScreen sesuai kodemu
 import 'views/home_page.dart'; 
 import 'views/auth_screen.dart';
 
@@ -9,7 +8,6 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        // Mendaftarkan AuthViewModel agar bisa dipakai di seluruh aplikasi
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
       ],
       child: const MyApp(),
@@ -29,7 +27,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.teal,
         useMaterial3: true,
       ),
-      // Jika ingin langsung ke daftar chat setelah login:
       home: const _StartPage(), 
     );
   }
@@ -47,7 +44,6 @@ class _StartPageState extends State<_StartPage> {
   void initState() {
     super.initState();
 
-    // ⏱ delay biar tidak crash saat build
     Future.delayed(const Duration(milliseconds: 500), () {
       Navigator.pushReplacement(
         context,
@@ -58,7 +54,6 @@ class _StartPageState extends State<_StartPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Bisa tampil kosong / loading sebentar
     return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(),

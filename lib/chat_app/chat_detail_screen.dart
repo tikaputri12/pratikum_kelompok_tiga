@@ -10,7 +10,7 @@ class ChatDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Chat Detail"),
-        backgroundColor: const Color(0xFF14A38B),
+        backgroundColor: Colors.blue, 
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -26,7 +26,9 @@ class ChatDetailScreen extends StatelessWidget {
               margin: const EdgeInsets.symmetric(vertical: 6),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isSender ? const Color(0xFF14A38B) : Colors.grey.shade300,
+                color: isSender
+                    ? Colors.blue 
+                    : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
