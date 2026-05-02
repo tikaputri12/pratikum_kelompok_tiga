@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../chat_app/chat_detail_screen.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
   final String apiText;
@@ -255,6 +256,13 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             _currentIndex = index;
           });
+
+          if (index == 3) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsPage()),
+            );
+          }
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
