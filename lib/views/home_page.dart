@@ -215,8 +215,10 @@ class _HomePageState extends State<HomePage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) =>
-                                      ChatDetailScreen(chats: chats),
+                                  builder: (_) => ChatDetailScreen(
+                                    chats: chats,
+                                    selectedIndex: index,
+                                  ),
                                 ),
                               );
                             },
