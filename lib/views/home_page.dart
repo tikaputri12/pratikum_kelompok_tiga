@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../chat_app/chat_detail_screen.dart';
+import 'profile_page.dart';
+import 'call_page.dart';
 import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -28,224 +30,8 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
 
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              /// 🔥 HEADER
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: const [
-                      Icon(Icons.chat, color: Colors.blue, size: 28),
-                      SizedBox(width: 8),
-                      Text(
-                        "AppChat",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  const Text(
-                    "UTS Kelas A - Kelompok 3",
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 10),
-
-              /// 🔥 STORIES
-              SizedBox(
-                height: 90,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    _storyItem("Anda", true),
-                    _storyItem("Ainun", false),
-                    _storyItem("Ryan", false),
-                    _storyItem("Adinda", false),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              /// 🔥 PEOPLE
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "People",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: const Text("+ Add"),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 15),
-
-              /// 🔥 TAB
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(child: _tab("Contact", true)),
-                    Expanded(child: _tab("Group", false)),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              /// 🔥 SEARCH
-              TextField(
-                decoration: InputDecoration(
-                  hintText: "Search",
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              /// 🔥 LIST CHAT
-              Expanded(
-                child: Consumer<AuthViewModel>(
-                  builder: (context, authVM, child) {
-                    if (authVM.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (authVM.error.isNotEmpty) {
-                      return Center(
-                        child: Text(
-                          authVM.error,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      );
-                    }
-
-                    final chats = authVM.chats;
-
-                    if (chats.isEmpty) {
-                      return const Center(child: Text("Tidak ada pesan"));
-                    }
-
-                    return ListView.builder(
-                      itemCount: chats.length,
-                      itemBuilder: (context, index) {
-                        final chat = chats[index];
-                        if (chat == null) return const SizedBox();
-
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(color: Colors.black12, blurRadius: 5),
-                            ],
-                          ),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.zero,
-
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.blue.shade100,
-                              child: Text(
-                                chat['profile'] != null
-                                    ? chat['profile']
-                                          .toString()[0]
-                                          .toUpperCase()
-                                    : '?',
-                              ),
-                            ),
-
-                            title: Text(
-                              chat['profile']?.toString() ?? '',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-
-                            subtitle: Text(
-                              chat['message']?.toString() ?? '',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-
-                            /// 🔥 STATUS + JAM
-                            trailing: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  chat['time']?.toString() ?? '',
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                                const SizedBox(height: 4),
-                                _messageStatus(chat['status'] ?? ''),
-                              ],
-                            ),
-
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ChatDetailScreen(
-                                    chats: chats,
-                                    selectedIndex: index,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-
-              /// 🔥 FILTER
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _filterChip("Semua", true),
-                    _filterChip("Belum dibaca", false),
-                    _filterChip("Favorit", false),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      /// 🔥 GANTI BODY
+      body: _getPage(),
 
       /// 🔥 BOTTOM NAV
       bottomNavigationBar: BottomNavigationBar(
@@ -256,13 +42,6 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             _currentIndex = index;
           });
-
-          if (index == 3) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingsPage()),
-            );
-          }
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
@@ -280,18 +59,252 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// 🔥 STATUS CHAT
+  /// 🔥 SWITCH HALAMAN
+  Widget _getPage() {
+    switch (_currentIndex) {
+      case 0:
+        return const ProfilePage();
+      case 1:
+        return _buildChatPage();
+      case 2:
+        return const CallPage();
+      case 3:
+        return const SettingsPage();
+      default:
+        return _buildChatPage();
+    }
+  }
+
+  /// 🔥 HALAMAN CHAT (ISI LAMA KAMU)
+  Widget _buildChatPage() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            /// HEADER
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.chat, color: Colors.blue, size: 28),
+                    SizedBox(width: 8),
+                    Text(
+                      "AppChat",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                const Text(
+                  "UTS Kelas A - Kelompok 3",
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            /// STORIES
+            SizedBox(
+              height: 90,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _storyItem("Anda", true),
+                  _storyItem("Ainun", false),
+                  _storyItem("Ryan", false),
+                  _storyItem("Adinda", false),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            /// PEOPLE
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "People",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Text("+ Add"),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 15),
+
+            /// TAB
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Expanded(child: _tab("Contact", true)),
+                  Expanded(child: _tab("Group", false)),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            /// SEARCH
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Search",
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            /// LIST CHAT
+            Expanded(
+              child: Consumer<AuthViewModel>(
+                builder: (context, authVM, child) {
+                  if (authVM.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (authVM.error.isNotEmpty) {
+                    return Center(
+                      child: Text(
+                        authVM.error,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  }
+
+                  final chats = authVM.chats;
+
+                  if (chats.isEmpty) {
+                    return const Center(child: Text("Tidak ada pesan"));
+                  }
+
+                  return ListView.builder(
+                    itemCount: chats.length,
+                    itemBuilder: (context, index) {
+                      final chat = chats[index];
+                      if (chat == null) return const SizedBox();
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black12, blurRadius: 5),
+                          ],
+                        ),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.blue.shade100,
+                            child: Text(
+                              chat['profile'] != null
+                                  ? chat['profile']
+                                        .toString()[0]
+                                        .toUpperCase()
+                                  : '?',
+                            ),
+                          ),
+
+                          title: Text(
+                            chat['profile']?.toString() ?? '',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          subtitle: Text(
+                            chat['message']?.toString() ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                chat['time']?.toString() ?? '',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              const SizedBox(height: 4),
+                              _messageStatus(chat['status'] ?? ''),
+                            ],
+                          ),
+
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChatDetailScreen(
+                                  chats: chats,
+                                  selectedIndex: index,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+
+            /// FILTER
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _filterChip("Semua", true),
+                  _filterChip("Belum dibaca", false),
+                  _filterChip("Favorit", false),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// STATUS CHAT
   Widget _messageStatus(String status) {
     switch (status) {
       case "sent":
         return const Icon(Icons.check, size: 16, color: Colors.grey);
-
       case "delivered":
         return const Icon(Icons.done_all, size: 16, color: Colors.grey);
-
       case "read":
         return const Icon(Icons.done_all, size: 16, color: Colors.blue);
-
       default:
         return const SizedBox();
     }
