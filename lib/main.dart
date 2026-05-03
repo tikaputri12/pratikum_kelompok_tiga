@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
-import 'Chat App/Message Search Screen.dart';
-import 'Chat App/Call History Screen.dart';
-import 'Chat App/Home Screen/home_screen.dart';
-import 'package:pratikum_kelompok_tiga/chat_app/auth_screen.dart';
-import 'package:pratikum_kelompok_tiga/chat_app/call_history_screen.dart';
+import 'package:provider/provider.dart'; 
+import 'viewmodels/auth_viewmodel.dart';
+// Import HomePage jika ingin langsung ke sana, atau AuthScreen sesuai kodemu
+import 'views/home_page.dart'; 
+import 'views/auth_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        // Mendaftarkan AuthViewModel agar bisa dipakai di seluruh aplikasi
+        ChangeNotifierProvider(create: (_) => AuthViewModel()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,67 +23,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Chat App',
       debugShowCheckedModeBanner: false,
+      title: 'UTS Kelompok 3',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        primarySwatch: Colors.teal,
         useMaterial3: true,
       ),
-      home: const AuthScreen(),
-    );
-  }
-}
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _screens = const [
-    HomeScreen(), // index 0 - Chats (Home)
-    MessageSearchScreen(), // index 1 - Search
-    CallHistoryScreen(), // index 2 - Calls
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: const Color(0xFF00BF6D),
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            activeIcon: Icon(Icons.chat_bubble),
-            label: 'Chats',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            activeIcon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.phone_outlined),
-            activeIcon: Icon(Icons.phone),
-            label: 'Calls',
-          ),
-        ],
-      ),
+      // Jika ingin langsung ke daftar chat setelah login:
+      home: const AuthScreen(), 
     );
   }
 }
