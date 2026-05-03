@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../chat_app/chat_detail_screen.dart';
+import 'profile_page.dart';
+import 'call_page.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
-  // apiText tetap diterima di constructor agar Navigator.push tidak error
   final String apiText;
   const HomePage({super.key, required this.apiText});
 
@@ -13,10 +15,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _currentIndex = 1;
+
   @override
   void initState() {
     super.initState();
-    // Memanggil API secara otomatis saat halaman dibuka
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthViewModel>().getApiData();
     });
@@ -25,170 +28,354 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF00BFA5),
-      // --- INTEGRASI APPBAR ---
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF00BFA5),
-        elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "UTS Kelas A - Kelompok 3",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Consumer<AuthViewModel>(
-              builder: (context, authVM, child) {
-                return Text(
-                  authVM.message.isEmpty ? widget.apiText : authVM.message,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.white70,
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.white),
-            onPressed: () {},
-          ),
+      backgroundColor: const Color(0xFFF5F6FA),
+
+      /// 🔥 GANTI BODY
+      body: _getPage(),
+
+      /// 🔥 BOTTOM NAV
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.blue,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
+          BottomNavigationBarItem(icon: Icon(Icons.call), label: "Panggilan"),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Setting"),
         ],
       ),
-      body: SafeArea(
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.message),
+      ),
+    );
+  }
+
+  /// 🔥 SWITCH HALAMAN
+  Widget _getPage() {
+    switch (_currentIndex) {
+      case 0:
+        return const ProfilePage();
+      case 1:
+        return _buildChatPage();
+      case 2:
+        return const CallPage();
+      case 3:
+        return const SettingsPage();
+      default:
+        return _buildChatPage();
+    }
+  }
+
+  /// 🔥 HALAMAN CHAT (ISI LAMA KAMU)
+  Widget _buildChatPage() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Bagian Header "Messages"
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Row(
-                children: const [
-                  Text(
-                    'Messages',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+            /// HEADER
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.chat, color: Colors.blue, size: 28),
+                    SizedBox(width: 8),
+                    Text(
+                      "AppChat",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
                     ),
-                  ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                const Text(
+                  "UTS Kelas A - Kelompok 3",
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            /// STORIES
+            SizedBox(
+              height: 90,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _storyItem("Anda", true),
+                  _storyItem("Ainun", false),
+                  _storyItem("Ryan", false),
+                  _storyItem("Adinda", false),
                 ],
               ),
             ),
 
-            // --- BAGIAN PUTIH (LIST CHAT) ---
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
-                ),
-                child: Consumer<AuthViewModel>(
-                  builder: (context, authVM, child) {
-                    if (authVM.isLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF00BFA5),
-                        ),
-                      );
-                    }
+            const SizedBox(height: 10),
 
-                    if (authVM.error.isNotEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              authVM.error,
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                            const SizedBox(height: 10),
-                            ElevatedButton(
-                              onPressed: () => authVM.getApiData(),
-                              child: const Text("Coba Lagi"),
-                            ),
+            /// PEOPLE
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "People",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Text("+ Add"),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 15),
+
+            /// TAB
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Expanded(child: _tab("Contact", true)),
+                  Expanded(child: _tab("Group", false)),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            /// SEARCH
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Search",
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            /// LIST CHAT
+            Expanded(
+              child: Consumer<AuthViewModel>(
+                builder: (context, authVM, child) {
+                  if (authVM.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (authVM.error.isNotEmpty) {
+                    return Center(
+                      child: Text(
+                        authVM.error,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  }
+
+                  final chats = authVM.chats;
+
+                  if (chats.isEmpty) {
+                    return const Center(child: Text("Tidak ada pesan"));
+                  }
+
+                  return ListView.builder(
+                    itemCount: chats.length,
+                    itemBuilder: (context, index) {
+                      final chat = chats[index];
+                      if (chat == null) return const SizedBox();
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black12, blurRadius: 5),
                           ],
                         ),
-                      );
-                    }
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
 
-                    final chats = authVM.chats;
-                    if (chats.isEmpty) {
-                      return const Center(child: Text("Tidak ada pesan"));
-                    }
-
-                    return ListView.separated(
-                      padding: const EdgeInsets.only(top: 20, bottom: 20),
-                      itemCount: chats.length,
-                      separatorBuilder: (context, index) =>
-                          const Divider(indent: 80, height: 1),
-                      itemBuilder: (context, index) {
-                        final chat = chats[index];
-                        if (chat == null) return const SizedBox.shrink();
-
-                        // --- KODE LISTTILE YANG DISALIN ---
-                        return ListTile(
                           leading: CircleAvatar(
-                            radius: 28,
-                            backgroundColor: Colors.grey[200],
+                            backgroundColor: Colors.blue.shade100,
                             child: Text(
                               chat['profile'] != null
-                                  ? chat['profile'].toString()[0].toUpperCase()
+                                  ? chat['profile']
+                                        .toString()[0]
+                                        .toUpperCase()
                                   : '?',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
                             ),
                           ),
+
                           title: Text(
-                            chat['profile']?.toString() ?? 'No Name',
+                            chat['profile']?.toString() ?? '',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
                             ),
                           ),
+
                           subtitle: Text(
                             chat['message']?.toString() ?? '',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          trailing: Text(
-                            chat['time']?.toString() ?? '',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
+
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                chat['time']?.toString() ?? '',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              const SizedBox(height: 4),
+                              _messageStatus(chat['status'] ?? ''),
+                            ],
                           ),
 
-                          // 🔥 INI YANG KURANG
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ChatDetailScreen(chats: chats),
+                                builder: (_) => ChatDetailScreen(
+                                  chats: chats,
+                                  selectedIndex: index,
+                                ),
                               ),
                             );
                           },
-                        );
-                      },
-                    );
-                  },
-                ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+
+            /// FILTER
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _filterChip("Semua", true),
+                  _filterChip("Belum dibaca", false),
+                  _filterChip("Favorit", false),
+                ],
               ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: const Color(0xFF00BFA5),
-        child: const Icon(Icons.message, color: Colors.white),
+    );
+  }
+
+  /// STATUS CHAT
+  Widget _messageStatus(String status) {
+    switch (status) {
+      case "sent":
+        return const Icon(Icons.check, size: 16, color: Colors.grey);
+      case "delivered":
+        return const Icon(Icons.done_all, size: 16, color: Colors.grey);
+      case "read":
+        return const Icon(Icons.done_all, size: 16, color: Colors.blue);
+      default:
+        return const SizedBox();
+    }
+  }
+
+  Widget _tab(String text, bool active) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: active ? Colors.white : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: active ? Colors.black : Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _storyItem(String name, bool isMe) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: Colors.grey.shade300,
+                child: Text(name[0]),
+              ),
+              if (isMe)
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: CircleAvatar(
+                    radius: 10,
+                    backgroundColor: Colors.blue,
+                    child: const Icon(Icons.add, size: 14, color: Colors.white),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Text(name, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  Widget _filterChip(String text, bool active) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: active ? Colors.blue : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: active ? Colors.white : Colors.black,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
     );
   }
