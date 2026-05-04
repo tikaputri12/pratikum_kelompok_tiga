@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; 
 import 'viewmodels/auth_viewmodel.dart';
 import 'views/home_page.dart'; 
-import 'views/auth_screen.dart';
 
 void main() {
   runApp(
@@ -33,7 +32,7 @@ class MyApp extends StatelessWidget {
   
 }
 class _StartPage extends StatefulWidget {
-  const _StartPage({super.key});
+  const _StartPage();
 
   @override
   State<_StartPage> createState() => _StartPageState();
