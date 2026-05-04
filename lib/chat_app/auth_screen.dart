@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthScreen extends StatefulWidget {
@@ -17,7 +16,6 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   late Animation<Offset> _slideAnim;
 
   bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
   bool isLoading = false;
 
   String apiMessage = "";
