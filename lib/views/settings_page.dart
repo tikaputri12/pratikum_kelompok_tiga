@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../main.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -13,7 +14,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
   String nama = "Agus Tina";
 
-  /// 🔥 EDIT NAMA
+  // ← TAMBAH INI: Sinkronkan isDark dengan themeNotifier saat halaman dibuka
+  @override
+  void initState() {
+    super.initState();
+    isDark = themeNotifier.value == ThemeMode.dark;
+  }
+
   void _editNama() {
     TextEditingController controller = TextEditingController(text: nama);
 
@@ -53,19 +60,18 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
-        backgroundColor: Colors.blue,
+        // ← UBAH: hapus backgroundColor hardcode, biar ikut tema
       ),
 
       body: ListView(
         children: [
-          /// 🔥 PROFILE (SUDAH KEREN + BISA EDIT)
           Container(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Theme.of(context).colorScheme.primary, // ← UBAH
                   child: const Icon(
                     Icons.person,
                     size: 30,
@@ -79,15 +85,18 @@ class _SettingsPageState extends State<SettingsPage> {
                   children: [
                     Text(
                       nama,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface, // ← TAMBAH
                       ),
                     ),
                     const SizedBox(height: 5),
-                    const Text(
+                    Text(
                       "Mahasiswa TI",
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant, // ← UBAH
+                      ),
                     ),
                   ],
                 ),
@@ -96,7 +105,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
                 GestureDetector(
                   onTap: _editNama,
-                  child: const Icon(Icons.edit, color: Colors.grey),
+                  child: Icon(
+                    Icons.edit,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant, // ← UBAH
+                  ),
                 ),
               ],
             ),
@@ -104,18 +116,17 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const Divider(),
 
-          /// 🔥 DARK MODE
           SwitchListTile(
             title: const Text("Dark Mode"),
             value: isDark,
             onChanged: (val) {
               setState(() {
                 isDark = val;
+                themeNotifier.value = val ? ThemeMode.dark : ThemeMode.light;
               });
             },
           ),
 
-          /// 🔥 NOTIFIKASI
           SwitchListTile(
             title: const Text("Notifikasi"),
             value: isNotif,
@@ -128,14 +139,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const Divider(),
 
-          /// 🔥 ABOUT
           const ListTile(
             leading: Icon(Icons.info),
             title: Text("Tentang Aplikasi"),
             subtitle: Text("AppChat v1.0\nUTS Kelompok 3"),
           ),
 
-          /// 🔥 LOGOUT
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text("Logout"),

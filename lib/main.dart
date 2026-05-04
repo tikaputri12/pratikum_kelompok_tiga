@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'viewmodels/auth_viewmodel.dart';
 import 'views/home_page.dart'; 
 
+// ← Tambah ini (level global, di luar class)
+ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+
 void main() {
   runApp(
     MultiProvider(
@@ -19,18 +22,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'UTS Kelompok 3',
-      theme: ThemeData(
-        primarySwatch: Colors.teal,
-        useMaterial3: true,
-      ),
-      home: const _StartPage(), 
+    // ← Bungkus dengan ValueListenableBuilder
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, currentMode, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'UTS Kelompok 3',
+          theme: ThemeData(
+            primarySwatch: Colors.teal,
+            useMaterial3: true,
+            brightness: Brightness.light, // ← Tambah ini
+          ),
+          darkTheme: ThemeData(           // ← Tambah ini
+            primarySwatch: Colors.teal,
+            useMaterial3: true,
+            brightness: Brightness.dark,
+          ),
+          themeMode: currentMode,         // ← Tambah ini
+          home: const _StartPage(), 
+        );
+      },
     );
   }
-  
 }
+
 class _StartPage extends StatefulWidget {
   const _StartPage();
 
