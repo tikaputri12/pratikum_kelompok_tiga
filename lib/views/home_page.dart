@@ -19,6 +19,8 @@ class _HomePageState extends State<HomePage> {
 
   List<Map<String, dynamic>> newChats = [];
 
+  String searchQuery = "";
+
   @override
   void initState() {
     super.initState();
@@ -166,6 +168,11 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 15),
 
             TextField(
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+              },
               decoration: InputDecoration(
                 hintText: "Search",
                 prefixIcon: const Icon(Icons.search),
@@ -196,13 +203,25 @@ class _HomePageState extends State<HomePage> {
                     );
                   }
 
-                  final chats = <Map<String, dynamic>>[
+                  final allChats = <Map<String, dynamic>>[
                     ...newChats,
-                    ...authVM.chats.map((chat) => Map<String, dynamic>.from(chat)),
+                    ...authVM.chats.map(
+                      (chat) => Map<String, dynamic>.from(chat),
+                    ),
                   ];
 
+                  final chats = allChats.where((chat) {
+                    final name =
+                        chat['profile']?.toString().toLowerCase() ?? '';
+                    final message =
+                        chat['message']?.toString().toLowerCase() ?? '';
+                    final query = searchQuery.toLowerCase();
+
+                    return name.contains(query) || message.contains(query);
+                  }).toList();
+
                   if (chats.isEmpty) {
-                    return const Center(child: Text("Tidak ada pesan"));
+                    return const Center(child: Text("Data tidak ditemukan"));
                   }
 
                   return ListView.builder(
