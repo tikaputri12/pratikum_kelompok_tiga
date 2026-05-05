@@ -21,6 +21,23 @@ class _HomePageState extends State<HomePage> {
 
   String searchQuery = "";
 
+  bool isGroup = false;
+
+  List<Map<String, dynamic>> groups = [
+    {
+      "profile": "Kelompok 3",
+      "message": "Diskusi tugas",
+      "time": "09:00",
+      "status": "read",
+    },
+    {
+      "profile": "Project Flutter",
+      "message": "Deadline besok!",
+      "time": "11:00",
+      "status": "delivered",
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -138,14 +155,16 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: _showAddContactDialog,
+                  onPressed: isGroup
+                      ? _showCreateGroupDialog
+                      : _showAddContactDialog,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: const Text("+ Add"),
+                  child: Text(isGroup ? "+ Group" : "+ Kontak"),
                 ),
               ],
             ),
@@ -159,8 +178,20 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Row(
                 children: [
-                  Expanded(child: _tab("Contact", true)),
-                  Expanded(child: _tab("Group", false)),
+                  Expanded(
+                    child: _tab("Contact", !isGroup, () {
+                      setState(() {
+                        isGroup = false;
+                      });
+                    }),
+                  ),
+                  Expanded(
+                    child: _tab("Group", isGroup, () {
+                      setState(() {
+                        isGroup = true;
+                      });
+                    }),
+                  ),
                 ],
               ),
             ),
@@ -203,12 +234,14 @@ class _HomePageState extends State<HomePage> {
                     );
                   }
 
-                  final allChats = <Map<String, dynamic>>[
-                    ...newChats,
-                    ...authVM.chats.map(
-                      (chat) => Map<String, dynamic>.from(chat),
-                    ),
-                  ];
+                  final allChats = isGroup
+                      ? groups
+                      : <Map<String, dynamic>>[
+                          ...newChats,
+                          ...authVM.chats.map(
+                            (chat) => Map<String, dynamic>.from(chat),
+                          ),
+                        ];
 
                   final chats = allChats.where((chat) {
                     final name =
@@ -221,7 +254,16 @@ class _HomePageState extends State<HomePage> {
                   }).toList();
 
                   if (chats.isEmpty) {
-                    return const Center(child: Text("Data tidak ditemukan"));
+                    return Center(
+                      child: Text(
+                        isGroup
+                            ? "Anda belum memiliki group"
+                            : "Data tidak ditemukan",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    );
                   }
 
                   return ListView.builder(
@@ -245,17 +287,18 @@ class _HomePageState extends State<HomePage> {
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primaryContainer,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
                             child: Text(
                               chat['profile'] != null &&
                                       chat['profile'].toString().isNotEmpty
                                   ? chat['profile'].toString()[0].toUpperCase()
                                   : '?',
                               style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
                               ),
                             ),
                           ),
@@ -271,8 +314,9 @@ class _HomePageState extends State<HomePage> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color:
-                                  Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                           trailing: Column(
@@ -283,9 +327,9 @@ class _HomePageState extends State<HomePage> {
                                 chat['time']?.toString() ?? '',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -310,17 +354,6 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
-
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _filterChip("Semua", true),
-                  _filterChip("Belum dibaca", false),
-                  _filterChip("Favorit", false),
-                ],
-              ),
-            ),
           ],
         ),
       ),
@@ -337,9 +370,7 @@ class _HomePageState extends State<HomePage> {
           title: const Text("Tambah Kontak"),
           content: TextField(
             controller: nameController,
-            decoration: const InputDecoration(
-              hintText: "Masukkan nama",
-            ),
+            decoration: const InputDecoration(hintText: "Masukkan nama"),
           ),
           actions: [
             TextButton(
@@ -386,23 +417,26 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Widget _tab(String text, bool active) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: active
-            ? Theme.of(context).colorScheme.surface
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: active
-                ? Theme.of(context).colorScheme.onSurface
-                : Theme.of(context).colorScheme.onSurfaceVariant,
+  Widget _tab(String text, bool active, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: active
+              ? Theme.of(context).colorScheme.surface
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: active
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ),
@@ -451,27 +485,100 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _filterChip(String text, bool active) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: active
-              ? Colors.blue
-              : Theme.of(context).colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: active
-                ? Colors.white
-                : Theme.of(context).colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
+
+void _showCreateGroupDialog() {
+  final TextEditingController groupNameController = TextEditingController();
+
+  final authVM = context.read<AuthViewModel>();
+
+  final contacts = authVM.chats
+      .map((chat) => Map<String, dynamic>.from(chat))
+      .toList();
+
+  List<String> selectedContacts = [];
+  
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text("Buat Group"),
+            content: SizedBox(
+              width: 400,
+              height: 400,
+              child: Column(
+                children: [
+                  TextField(
+                    controller: groupNameController,
+                    decoration: const InputDecoration(
+                      hintText: "Masukkan nama group",
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: contacts.length,
+                      itemBuilder: (context, index) {
+                        final contact = contacts[index];
+                        final name = contact['profile']?.toString() ?? '';
+
+                        return CheckboxListTile(
+                          value: selectedContacts.contains(name),
+                          onChanged: (value) {
+                            setDialogState(() {
+                              if (value == true) {
+                                selectedContacts.add(name);
+                              } else {
+                                selectedContacts.remove(name);
+                              }
+                            });
+                          },
+                          secondary: CircleAvatar(
+                            child: Text(
+                              name.isNotEmpty ? name[0].toUpperCase() : "?",
+                            ),
+                          ),
+                          title: Text(name),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("Batal"),
+              ),
+              TextButton(
+                onPressed: () {
+                  final groupName = groupNameController.text.trim();
+
+                  if (groupName.isNotEmpty && selectedContacts.isNotEmpty) {
+                    setState(() {
+                      groups.insert(0, {
+                        "profile": groupName,
+                        "message":
+                            "${selectedContacts.length} anggota: ${selectedContacts.join(', ')}",
+                        "time": "Baru",
+                        "status": "sent",
+                      });
+                    });
+                  }
+
+                  Navigator.pop(context);
+                },
+                child: const Text("Buat"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
 }
