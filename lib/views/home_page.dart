@@ -133,10 +133,10 @@ class _HomePageState extends State<HomePage> {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _storyItem("Anda", true),
-                  _storyItem("Ainun", false),
-                  _storyItem("Ryan", false),
-                  _storyItem("Adinda", false),
+                  _onlineItem("Anda", true),
+                  _onlineItem("Ainun", false),
+                  _onlineItem("Ryan", false),
+                  _onlineItem("Adinda", false),
                 ],
               ),
             ),
@@ -443,142 +443,145 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _storyItem(String name, bool isMe) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 10),
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                child: Text(
-                  name[0],
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+  Widget _onlineItem(String name, bool isMe) {
+  return Padding(
+    padding: const EdgeInsets.only(right: 10),
+    child: Column(
+      children: [
+        Stack(
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              child: Text(
+                name[0],
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
-              if (isMe)
-                const Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: CircleAvatar(
-                    radius: 10,
-                    backgroundColor: Colors.blue,
-                    child: Icon(Icons.add, size: 14, color: Colors.white),
-                  ),
+            ),
+
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
                 ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Text(
-            name,
-            style: TextStyle(
-              fontSize: 12,
-               color: Theme.of(context).colorScheme.onSurface, // ← TAMBAH
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-
-void _showCreateGroupDialog() {
-  final TextEditingController groupNameController = TextEditingController();
-
-  final authVM = context.read<AuthViewModel>();
-
-  final contacts = authVM.chats
-      .map((chat) => Map<String, dynamic>.from(chat))
-      .toList();
-
-  List<String> selectedContacts = [];
-  
-  showDialog(
-    context: context,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            title: const Text("Buat Group"),
-            content: SizedBox(
-              width: 400,
-              height: 400,
-              child: Column(
-                children: [
-                  TextField(
-                    controller: groupNameController,
-                    decoration: const InputDecoration(
-                      hintText: "Masukkan nama group",
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: contacts.length,
-                      itemBuilder: (context, index) {
-                        final contact = contacts[index];
-                        final name = contact['profile']?.toString() ?? '';
-
-                        return CheckboxListTile(
-                          value: selectedContacts.contains(name),
-                          onChanged: (value) {
-                            setDialogState(() {
-                              if (value == true) {
-                                selectedContacts.add(name);
-                              } else {
-                                selectedContacts.remove(name);
-                              }
-                            });
-                          },
-                          secondary: CircleAvatar(
-                            child: Text(
-                              name.isNotEmpty ? name[0].toUpperCase() : "?",
-                            ),
-                          ),
-                          title: Text(name),
-                        );
-                      },
-                    ),
-                  ),
-                ],
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text("Batal"),
-              ),
-              TextButton(
-                onPressed: () {
-                  final groupName = groupNameController.text.trim();
-
-                  if (groupName.isNotEmpty && selectedContacts.isNotEmpty) {
-                    setState(() {
-                      groups.insert(0, {
-                        "profile": groupName,
-                        "message":
-                            "${selectedContacts.length} anggota: ${selectedContacts.join(', ')}",
-                        "time": "Baru",
-                        "status": "sent",
-                      });
-                    });
-                  }
-
-                  Navigator.pop(context);
-                },
-                child: const Text("Buat"),
-              ),
-            ],
-          );
-        },
-      );
-    },
+          ],
+        ),
+        const SizedBox(height: 5),
+        Text(
+          name,
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+      ],
+    ),
   );
 }
+
+  void _showCreateGroupDialog() {
+    final TextEditingController groupNameController = TextEditingController();
+
+    final authVM = context.read<AuthViewModel>();
+
+    final contacts = authVM.chats
+        .map((chat) => Map<String, dynamic>.from(chat))
+        .toList();
+
+    List<String> selectedContacts = [];
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text("Buat Group"),
+              content: SizedBox(
+                width: 400,
+                height: 400,
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: groupNameController,
+                      decoration: const InputDecoration(
+                        hintText: "Masukkan nama group",
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: contacts.length,
+                        itemBuilder: (context, index) {
+                          final contact = contacts[index];
+                          final name = contact['profile']?.toString() ?? '';
+
+                          return CheckboxListTile(
+                            value: selectedContacts.contains(name),
+                            onChanged: (value) {
+                              setDialogState(() {
+                                if (value == true) {
+                                  selectedContacts.add(name);
+                                } else {
+                                  selectedContacts.remove(name);
+                                }
+                              });
+                            },
+                            secondary: CircleAvatar(
+                              child: Text(
+                                name.isNotEmpty ? name[0].toUpperCase() : "?",
+                              ),
+                            ),
+                            title: Text(name),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Batal"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final groupName = groupNameController.text.trim();
+
+                    if (groupName.isNotEmpty && selectedContacts.isNotEmpty) {
+                      setState(() {
+                        groups.insert(0, {
+                          "profile": groupName,
+                          "message":
+                              "${selectedContacts.length} anggota: ${selectedContacts.join(', ')}",
+                          "time": "Baru",
+                          "status": "sent",
+                        });
+                      });
+                    }
+
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Buat"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 }
