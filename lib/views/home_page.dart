@@ -17,6 +17,27 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 1;
 
+  List<Map<String, dynamic>> newChats = [];
+
+  String searchQuery = "";
+
+  bool isGroup = false;
+
+  List<Map<String, dynamic>> groups = [
+    {
+      "profile": "Kelompok 3",
+      "message": "Diskusi tugas",
+      "time": "09:00",
+      "status": "read",
+    },
+    {
+      "profile": "Project Flutter",
+      "message": "Deadline besok!",
+      "time": "11:00",
+      "status": "delivered",
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -28,18 +49,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ← UBAH: hapus backgroundColor hardcode
       backgroundColor: Theme.of(context).colorScheme.surface,
-
       body: _getPage(),
-
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.blue,
-        // ← TAMBAH: warna item yang tidak aktif ikut tema
         unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
-        // ← TAMBAH: background bottom nav ikut tema
         backgroundColor: Theme.of(context).colorScheme.surface,
         onTap: (index) {
           setState(() {
@@ -53,7 +69,6 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Setting"),
         ],
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         backgroundColor: Colors.blue,
@@ -86,8 +101,8 @@ class _HomePageState extends State<HomePage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Icon(Icons.chat, color: Colors.blue, size: 28),
                     SizedBox(width: 8),
                     Text(
@@ -101,12 +116,11 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 5),
-                // ← UBAH: hapus const, pakai Theme
                 Text(
                   "UTS Kelas A - Kelompok 3",
                   style: TextStyle(
                     fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant, // ← UBAH
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -137,18 +151,20 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface, // ← UBAH
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: isGroup
+                      ? _showCreateGroupDialog
+                      : _showAddContactDialog,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: const Text("+ Add"),
+                  child: Text(isGroup ? "+ Group" : "+ Kontak"),
                 ),
               ],
             ),
@@ -157,13 +173,25 @@ class _HomePageState extends State<HomePage> {
 
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant, // ← UBAH
+                color: Theme.of(context).colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  Expanded(child: _tab("Contact", true)),
-                  Expanded(child: _tab("Group", false)),
+                  Expanded(
+                    child: _tab("Contact", !isGroup, () {
+                      setState(() {
+                        isGroup = false;
+                      });
+                    }),
+                  ),
+                  Expanded(
+                    child: _tab("Group", isGroup, () {
+                      setState(() {
+                        isGroup = true;
+                      });
+                    }),
+                  ),
                 ],
               ),
             ),
@@ -171,11 +199,16 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 15),
 
             TextField(
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+              },
               decoration: InputDecoration(
                 hintText: "Search",
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceVariant, // ← UBAH
+                fillColor: Theme.of(context).colorScheme.surfaceVariant,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -201,63 +234,91 @@ class _HomePageState extends State<HomePage> {
                     );
                   }
 
-                  final chats = authVM.chats;
+                  final allChats = isGroup
+                      ? groups
+                      : <Map<String, dynamic>>[
+                          ...newChats,
+                          ...authVM.chats.map(
+                            (chat) => Map<String, dynamic>.from(chat),
+                          ),
+                        ];
+
+                  final chats = allChats.where((chat) {
+                    final name =
+                        chat['profile']?.toString().toLowerCase() ?? '';
+                    final message =
+                        chat['message']?.toString().toLowerCase() ?? '';
+                    final query = searchQuery.toLowerCase();
+
+                    return name.contains(query) || message.contains(query);
+                  }).toList();
 
                   if (chats.isEmpty) {
-                    return const Center(child: Text("Tidak ada pesan"));
+                    return Center(
+                      child: Text(
+                        isGroup
+                            ? "Anda belum memiliki group"
+                            : "Data tidak ditemukan",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    );
                   }
 
                   return ListView.builder(
                     itemCount: chats.length,
                     itemBuilder: (context, index) {
                       final chat = chats[index];
-                      if (chat == null) return const SizedBox();
 
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainer, // ← UBAH
+                          color: Theme.of(context).colorScheme.surfaceContainer,
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05), // ← UBAH
+                              color: Colors.black.withOpacity(0.05),
                               blurRadius: 5,
                             ),
                           ],
                         ),
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
-
                           leading: CircleAvatar(
-                            backgroundColor: Theme.of(context).colorScheme.primaryContainer, // ← UBAH
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
                             child: Text(
-                              chat['profile'] != null
+                              chat['profile'] != null &&
+                                      chat['profile'].toString().isNotEmpty
                                   ? chat['profile'].toString()[0].toUpperCase()
                                   : '?',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimaryContainer, // ← TAMBAH
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
                               ),
                             ),
                           ),
-
                           title: Text(
                             chat['profile']?.toString() ?? '',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface, // ← TAMBAH
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
-
                           subtitle: Text(
                             chat['message']?.toString() ?? '',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant, // ← TAMBAH
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           ),
-
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -266,14 +327,15 @@ class _HomePageState extends State<HomePage> {
                                 chat['time']?.toString() ?? '',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant, // ← TAMBAH
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              _messageStatus(chat['status'] ?? ''),
+                              _messageStatus(chat['status']?.toString() ?? ''),
                             ],
                           ),
-
                           onTap: () {
                             Navigator.push(
                               context,
@@ -292,20 +354,53 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
-
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _filterChip("Semua", true),
-                  _filterChip("Belum dibaca", false),
-                  _filterChip("Favorit", false),
-                ],
-              ),
-            ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showAddContactDialog() {
+    final TextEditingController nameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Tambah Kontak"),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(hintText: "Masukkan nama"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Batal"),
+            ),
+            TextButton(
+              onPressed: () {
+                final name = nameController.text.trim();
+
+                if (name.isNotEmpty) {
+                  setState(() {
+                    newChats.insert(0, {
+                      "profile": name,
+                      "message": "Kontak baru ditambahkan",
+                      "time": "Baru",
+                      "status": "sent",
+                    });
+                  });
+                }
+
+                Navigator.pop(context);
+              },
+              child: const Text("Tambah"),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -322,23 +417,26 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Widget _tab(String text, bool active) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: active
-            ? Theme.of(context).colorScheme.surface // ← UBAH
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: active
-                ? Theme.of(context).colorScheme.onSurface // ← UBAH
-                : Theme.of(context).colorScheme.onSurfaceVariant, // ← UBAH
+  Widget _tab(String text, bool active, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: active
+              ? Theme.of(context).colorScheme.surface
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: active
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ),
@@ -354,22 +452,22 @@ class _HomePageState extends State<HomePage> {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: Theme.of(context).colorScheme.surfaceVariant, // ← UBAH
+                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                 child: Text(
                   name[0],
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant, // ← TAMBAH
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
               if (isMe)
-                Positioned(
+                const Positioned(
                   bottom: 0,
                   right: 0,
                   child: CircleAvatar(
                     radius: 10,
                     backgroundColor: Colors.blue,
-                    child: const Icon(Icons.add, size: 14, color: Colors.white),
+                    child: Icon(Icons.add, size: 14, color: Colors.white),
                   ),
                 ),
             ],
@@ -387,27 +485,100 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _filterChip(String text, bool active) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: active
-              ? Colors.blue
-              : Theme.of(context).colorScheme.surfaceVariant, // ← UBAH
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: active
-                ? Colors.white
-                : Theme.of(context).colorScheme.onSurfaceVariant, // ← UBAH
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
+
+void _showCreateGroupDialog() {
+  final TextEditingController groupNameController = TextEditingController();
+
+  final authVM = context.read<AuthViewModel>();
+
+  final contacts = authVM.chats
+      .map((chat) => Map<String, dynamic>.from(chat))
+      .toList();
+
+  List<String> selectedContacts = [];
+  
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text("Buat Group"),
+            content: SizedBox(
+              width: 400,
+              height: 400,
+              child: Column(
+                children: [
+                  TextField(
+                    controller: groupNameController,
+                    decoration: const InputDecoration(
+                      hintText: "Masukkan nama group",
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: contacts.length,
+                      itemBuilder: (context, index) {
+                        final contact = contacts[index];
+                        final name = contact['profile']?.toString() ?? '';
+
+                        return CheckboxListTile(
+                          value: selectedContacts.contains(name),
+                          onChanged: (value) {
+                            setDialogState(() {
+                              if (value == true) {
+                                selectedContacts.add(name);
+                              } else {
+                                selectedContacts.remove(name);
+                              }
+                            });
+                          },
+                          secondary: CircleAvatar(
+                            child: Text(
+                              name.isNotEmpty ? name[0].toUpperCase() : "?",
+                            ),
+                          ),
+                          title: Text(name),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("Batal"),
+              ),
+              TextButton(
+                onPressed: () {
+                  final groupName = groupNameController.text.trim();
+
+                  if (groupName.isNotEmpty && selectedContacts.isNotEmpty) {
+                    setState(() {
+                      groups.insert(0, {
+                        "profile": groupName,
+                        "message":
+                            "${selectedContacts.length} anggota: ${selectedContacts.join(', ')}",
+                        "time": "Baru",
+                        "status": "sent",
+                      });
+                    });
+                  }
+
+                  Navigator.pop(context);
+                },
+                child: const Text("Buat"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
 }
