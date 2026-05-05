@@ -41,26 +41,26 @@ class _HomePageState extends State<HomePage> {
   ];
 
   @override
- @override
-void initState() {
-  super.initState();
+  @override
+  void initState() {
+    super.initState();
 
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    context.read<AuthViewModel>().getApiData();
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthViewModel>().getApiData();
+    });
 
-  chatScrollController.addListener(() {
-    if (chatScrollController.offset > 0 && !showButton) {
-      setState(() {
-        showButton = true;
-      });
-    } else if (chatScrollController.offset == 0 && showButton) {
-      setState(() {
-        showButton = false;
-      });
-    }
-  });
-}
+    chatScrollController.addListener(() {
+      if (chatScrollController.offset > 0 && !showButton) {
+        setState(() {
+          showButton = true;
+        });
+      } else if (chatScrollController.offset == 0 && showButton) {
+        setState(() {
+          showButton = false;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,17 +85,19 @@ void initState() {
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Setting"),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          chatScrollController.animateTo(
-            0,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
-        },
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.arrow_upward),
-      ),
+      floatingActionButton: showButton
+          ? FloatingActionButton(
+              onPressed: () {
+                chatScrollController.animateTo(
+                  0,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                );
+              },
+              backgroundColor: Colors.blue,
+              child: const Icon(Icons.arrow_upward),
+            )
+          : null,
     );
   }
 
