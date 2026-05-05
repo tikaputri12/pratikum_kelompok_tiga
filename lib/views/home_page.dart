@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _onlineItem("Anda", true),
+                  _onlineItem("Hida", true),
                   _onlineItem("Ainun", false),
                   _onlineItem("Ryan", false),
                   _onlineItem("Adinda", false),
