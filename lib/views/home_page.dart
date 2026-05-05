@@ -17,6 +17,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 1;
 
+  List<Map<String, dynamic>> newChats = [];
+
   @override
   void initState() {
     super.initState();
@@ -28,18 +30,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ← UBAH: hapus backgroundColor hardcode
       backgroundColor: Theme.of(context).colorScheme.surface,
-
       body: _getPage(),
-
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.blue,
-        // ← TAMBAH: warna item yang tidak aktif ikut tema
         unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
-        // ← TAMBAH: background bottom nav ikut tema
         backgroundColor: Theme.of(context).colorScheme.surface,
         onTap: (index) {
           setState(() {
@@ -53,7 +50,6 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Setting"),
         ],
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         backgroundColor: Colors.blue,
@@ -86,8 +82,8 @@ class _HomePageState extends State<HomePage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Icon(Icons.chat, color: Colors.blue, size: 28),
                     SizedBox(width: 8),
                     Text(
@@ -101,12 +97,11 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 5),
-                // ← UBAH: hapus const, pakai Theme
                 Text(
                   "UTS Kelas A - Kelompok 3",
                   style: TextStyle(
                     fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant, // ← UBAH
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -137,11 +132,11 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface, // ← UBAH
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _showAddContactDialog,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
@@ -157,7 +152,7 @@ class _HomePageState extends State<HomePage> {
 
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant, // ← UBAH
+                color: Theme.of(context).colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -175,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                 hintText: "Search",
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceVariant, // ← UBAH
+                fillColor: Theme.of(context).colorScheme.surfaceVariant,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -201,7 +196,10 @@ class _HomePageState extends State<HomePage> {
                     );
                   }
 
-                  final chats = authVM.chats;
+                  final chats = <Map<String, dynamic>>[
+                    ...newChats,
+                    ...authVM.chats.map((chat) => Map<String, dynamic>.from(chat)),
+                  ];
 
                   if (chats.isEmpty) {
                     return const Center(child: Text("Tidak ada pesan"));
@@ -211,53 +209,53 @@ class _HomePageState extends State<HomePage> {
                     itemCount: chats.length,
                     itemBuilder: (context, index) {
                       final chat = chats[index];
-                      if (chat == null) return const SizedBox();
 
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainer, // ← UBAH
+                          color: Theme.of(context).colorScheme.surfaceContainer,
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05), // ← UBAH
+                              color: Colors.black.withOpacity(0.05),
                               blurRadius: 5,
                             ),
                           ],
                         ),
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
-
                           leading: CircleAvatar(
-                            backgroundColor: Theme.of(context).colorScheme.primaryContainer, // ← UBAH
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primaryContainer,
                             child: Text(
-                              chat['profile'] != null
+                              chat['profile'] != null &&
+                                      chat['profile'].toString().isNotEmpty
                                   ? chat['profile'].toString()[0].toUpperCase()
                                   : '?',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimaryContainer, // ← TAMBAH
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
                               ),
                             ),
                           ),
-
                           title: Text(
                             chat['profile']?.toString() ?? '',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface, // ← TAMBAH
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
-
                           subtitle: Text(
                             chat['message']?.toString() ?? '',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant, // ← TAMBAH
+                              color:
+                                  Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
-
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -266,14 +264,15 @@ class _HomePageState extends State<HomePage> {
                                 chat['time']?.toString() ?? '',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant, // ← TAMBAH
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              _messageStatus(chat['status'] ?? ''),
+                              _messageStatus(chat['status']?.toString() ?? ''),
                             ],
                           ),
-
                           onTap: () {
                             Navigator.push(
                               context,
@@ -309,6 +308,52 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _showAddContactDialog() {
+    final TextEditingController nameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Tambah Kontak"),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              hintText: "Masukkan nama",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Batal"),
+            ),
+            TextButton(
+              onPressed: () {
+                final name = nameController.text.trim();
+
+                if (name.isNotEmpty) {
+                  setState(() {
+                    newChats.insert(0, {
+                      "profile": name,
+                      "message": "Kontak baru ditambahkan",
+                      "time": "Baru",
+                      "status": "sent",
+                    });
+                  });
+                }
+
+                Navigator.pop(context);
+              },
+              child: const Text("Tambah"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _messageStatus(String status) {
     switch (status) {
       case "sent":
@@ -327,7 +372,7 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: active
-            ? Theme.of(context).colorScheme.surface // ← UBAH
+            ? Theme.of(context).colorScheme.surface
             : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
       ),
@@ -337,8 +382,8 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: active
-                ? Theme.of(context).colorScheme.onSurface // ← UBAH
-                : Theme.of(context).colorScheme.onSurfaceVariant, // ← UBAH
+                ? Theme.of(context).colorScheme.onSurface
+                : Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ),
@@ -354,22 +399,22 @@ class _HomePageState extends State<HomePage> {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: Theme.of(context).colorScheme.surfaceVariant, // ← UBAH
+                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                 child: Text(
                   name[0],
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant, // ← TAMBAH
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
               if (isMe)
-                Positioned(
+                const Positioned(
                   bottom: 0,
                   right: 0,
                   child: CircleAvatar(
                     radius: 10,
                     backgroundColor: Colors.blue,
-                    child: const Icon(Icons.add, size: 14, color: Colors.white),
+                    child: Icon(Icons.add, size: 14, color: Colors.white),
                   ),
                 ),
             ],
@@ -379,7 +424,7 @@ class _HomePageState extends State<HomePage> {
             name,
             style: TextStyle(
               fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurface, // ← TAMBAH
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
@@ -395,7 +440,7 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           color: active
               ? Colors.blue
-              : Theme.of(context).colorScheme.surfaceVariant, // ← UBAH
+              : Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -403,7 +448,7 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(
             color: active
                 ? Colors.white
-                : Theme.of(context).colorScheme.onSurfaceVariant, // ← UBAH
+                : Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
           ),
         ),
