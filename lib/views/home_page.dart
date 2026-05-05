@@ -379,7 +379,7 @@ class _HomePageState extends State<HomePage> {
             name,
             style: TextStyle(
               fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurface, // ← TAMBAH
+               color: Theme.of(context).colorScheme.onSurface, // ← TAMBAH
             ),
           ),
         ],
