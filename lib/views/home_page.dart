@@ -8,6 +8,7 @@ import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
   final String apiText;
+
   const HomePage({super.key, required this.apiText});
 
   @override
@@ -18,9 +19,10 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 1;
 
   List<Map<String, dynamic>> newChats = [];
+  final ScrollController chatScrollController = ScrollController();
 
   String searchQuery = "";
-
+  bool showButton = false;
   bool isGroup = false;
 
   List<Map<String, dynamic>> groups = [
@@ -39,12 +41,26 @@ class _HomePageState extends State<HomePage> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthViewModel>().getApiData();
-    });
-  }
+ @override
+void initState() {
+  super.initState();
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    context.read<AuthViewModel>().getApiData();
+  });
+
+  chatScrollController.addListener(() {
+    if (chatScrollController.offset > 0 && !showButton) {
+      setState(() {
+        showButton = true;
+      });
+    } else if (chatScrollController.offset == 0 && showButton) {
+      setState(() {
+        showButton = false;
+      });
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -70,9 +86,15 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          chatScrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        },
         backgroundColor: Colors.blue,
-        child: const Icon(Icons.message),
+        child: const Icon(Icons.arrow_upward),
       ),
     );
   }
@@ -267,6 +289,7 @@ class _HomePageState extends State<HomePage> {
                   }
 
                   return ListView.builder(
+                    controller: chatScrollController,
                     itemCount: chats.length,
                     itemBuilder: (context, index) {
                       final chat = chats[index];
@@ -444,50 +467,50 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _onlineItem(String name, bool isMe) {
-  return Padding(
-    padding: const EdgeInsets.only(right: 10),
-    child: Column(
-      children: [
-        Stack(
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-              child: Text(
-                name[0],
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                child: Text(
+                  name[0],
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
-            ),
 
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 5),
-        Text(
-          name,
-          style: TextStyle(
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface,
+            ],
           ),
-        ),
-      ],
-    ),
-  );
-}
+          const SizedBox(height: 5),
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showCreateGroupDialog() {
     final TextEditingController groupNameController = TextEditingController();
